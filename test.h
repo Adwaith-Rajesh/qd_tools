@@ -64,6 +64,8 @@ int main(void) {
 static int test_count = 0;
 static int test_pass_count = 0;
 
+#include <stdio.h>
+
 #ifndef SHOW_FAIL_REASON
 // fail reason off
 #define TEST(name, block)                                       \
@@ -92,7 +94,6 @@ static int test_pass_count = 0;
 #else
 // fail reason on
 
-#include <stdio.h>
 #include <string.h>
 
 char fail_reason[4096] = {0};

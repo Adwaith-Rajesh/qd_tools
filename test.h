@@ -19,8 +19,8 @@ It is an STB style (https://github.com/nothings/stb) header file
 that includes both the declaration and the implementation of the functions.
 
 test.h is not supposed be used with multiple files, in the sense that
-each file source that includes the test.h file must be compiled and ran
-independently (This is might be worked on in the future)
+each source file that includes the test.h file must be compiled and ran
+independently (This might be worked on in the future)
 
 
 DEFINITIONS:
@@ -37,13 +37,11 @@ USAGE:
 
 #define QD_TEST_IMPLEMENTATION
 #define SHOW_FAIL_REASON  // prints the reason for failure
+#define SHOW_TEST_STATISTICS
 #include "test.h"
 
 int main(void) {
     TEST("The name of the test", {
-        // every test block requires an ASSERT other wise
-        // it will be considered as a failed test
-
         ASSERT(1 == 2);
     });
 
@@ -59,11 +57,18 @@ int main(void) {
 
 #ifdef SHOW_FAIL_REASON
 
+#include <stdio.h>
+#include <string.h>
+
+char fail_reason[4096] = {0};
+
 #endif  // SHOW_FAIL_REASON
 
+#ifndef SHOW_FAIL_REASON
+// fail reason off
 #define TEST(name, block)                                       \
     {                                                           \
-        int assert_pass = 0;                                    \
+        int assert_pass = 1;                                    \
         block;                                                  \
         if (assert_pass == 0) {                                 \
             printf("\x1b[31m[FAILED]\x1b[0m: \x1b[33m" __FILE__ \
@@ -77,9 +82,35 @@ int main(void) {
 
 #define ASSERT(exp)          \
     {                        \
-        if ((exp)) {         \
-            assert_pass = 1; \
+        if (!(exp)) {        \
+            assert_pass = 0; \
         }                    \
     }
 
+#else
+// fail reason on
+#define TEST(name, block)                                       \
+    {                                                           \
+        int assert_pass = 1;                                    \
+        block;                                                  \
+        if (assert_pass == 0) {                                 \
+            printf("\x1b[31m[FAILED]\x1b[0m: \x1b[33m" __FILE__ \
+                   ":"                                          \
+                   "%d\x1b[0m %s -- %s\n",                      \
+                   __LINE__, name, fail_reason);                \
+        } else {                                                \
+            printf("\x1b[32m[ PASS ]\x1b[0m: %s\n", name);      \
+        }                                                       \
+        memset(fail_reason, 0, 4096);                           \
+    }
+
+#define ASSERT(exp)                           \
+    {                                         \
+        if (!(exp)) {                         \
+            assert_pass = 0;                  \
+            strncpy(fail_reason, #exp, 4096); \
+        }                                     \
+    }
 #endif
+
+#endif  // main ifdef

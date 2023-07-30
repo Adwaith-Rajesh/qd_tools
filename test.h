@@ -55,15 +55,6 @@ int main(void) {
 #ifndef QD_TOOLS_TEST_H
 #define QD_TOOLS_TEST_H
 
-#ifdef SHOW_FAIL_REASON
-
-#include <stdio.h>
-#include <string.h>
-
-char fail_reason[4096] = {0};
-
-#endif  // SHOW_FAIL_REASON
-
 #ifndef SHOW_FAIL_REASON
 // fail reason off
 #define TEST(name, block)                                       \
@@ -89,6 +80,12 @@ char fail_reason[4096] = {0};
 
 #else
 // fail reason on
+
+#include <stdio.h>
+#include <string.h>
+
+char fail_reason[4096] = {0};
+
 #define TEST(name, block)                                       \
     {                                                           \
         int assert_pass = 1;                                    \

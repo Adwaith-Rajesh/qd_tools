@@ -26,10 +26,16 @@ independently (This might be worked on in the future)
 DEFINITIONS:
 
     MACROS:
-        TEST        - create a test blocs
-        ASSERT      - assert the given stmt (a simple if block)
+        TEST                        - create a test blocs
+        ASSERT                      - assert the given stmt (a simple if block)
+        ASSERT_FAIL                 - explicitly fail a test
+        ASSERT_FAIL_W_REASON        - explicitly fail a test with a given reason
 
+            - ASSERT_FAIL_W_REASON with remove the previously set reason, if you have
+              other failing asserts it will change the reason set with this macro
 
+    FUNCTIONS:
+        test_end_call()             - prints the number of test that passed and failed
 
 USAGE:
 
@@ -115,7 +121,16 @@ char fail_reason[4096] = {0};
             strncpy(fail_reason, #exp, 4096); \
         }                                     \
     }
+
+#define ASSERT_FAIL_W_REASON(reason) \
+    assert_pass = 0;                 \
+    strncpy(fail_reason, reason, 4096);
+
 #endif
+
+// available in both modes
+#define ASSERT_FAIL() \
+    assert_pass = 0;
 
 #ifdef SHOW_TEST_STATISTICS
 

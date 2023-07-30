@@ -47,7 +47,7 @@ int main(void) {
 
     // prints the test statistics and also sets the exit code
     // 0 if all pass else 1
-    return test_end_call();
+    return test_end_call();  // from SHOW_TEST_STATISTICS
 }
 
 */
@@ -55,10 +55,14 @@ int main(void) {
 #ifndef QD_TOOLS_TEST_H
 #define QD_TOOLS_TEST_H
 
+static int test_count = 0;
+static int test_pass_count = 0;
+
 #ifndef SHOW_FAIL_REASON
 // fail reason off
 #define TEST(name, block)                                       \
     {                                                           \
+        test_count++;                                           \
         int assert_pass = 1;                                    \
         block;                                                  \
         if (assert_pass == 0) {                                 \
@@ -67,6 +71,7 @@ int main(void) {
                    "%d\x1b[0m %s\n",                            \
                    __LINE__, name);                             \
         } else {                                                \
+            test_pass_count++;                                  \
             printf("\x1b[32m[ PASS ]\x1b[0m: %s\n", name);      \
         }                                                       \
     }
@@ -88,6 +93,7 @@ char fail_reason[4096] = {0};
 
 #define TEST(name, block)                                       \
     {                                                           \
+        test_count++;                                           \
         int assert_pass = 1;                                    \
         block;                                                  \
         if (assert_pass == 0) {                                 \
@@ -96,6 +102,7 @@ char fail_reason[4096] = {0};
                    "%d\x1b[0m %s -- %s\n",                      \
                    __LINE__, name, fail_reason);                \
         } else {                                                \
+            test_pass_count++;                                  \
             printf("\x1b[32m[ PASS ]\x1b[0m: %s\n", name);      \
         }                                                       \
         memset(fail_reason, 0, 4096);                           \
@@ -108,6 +115,19 @@ char fail_reason[4096] = {0};
             strncpy(fail_reason, #exp, 4096); \
         }                                     \
     }
+#endif
+
+#ifdef SHOW_TEST_STATISTICS
+
+#include <stdio.h>
+#include <stdlib.h>
+
+static int test_end_call(void) {
+    printf("Total: %d -- Passed: %d -- Failed: %d\n",
+           test_count, test_pass_count, test_count - test_pass_count);
+    return test_pass_count == test_count ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+
 #endif
 
 #endif  // main ifdef
